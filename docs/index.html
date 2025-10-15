@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SELF-INSTRUCT — Step 1: Instruction Generation</title>
+  <style>
+    :root {
+      --bg: #0b0f14; --panel: #0f1520; --ink: #e6edf3; --muted:#9fb3c8; --acc:#73caff; --hl:#243447;
+      --ok:#7bd88f; --warn:#ffd479; --err:#ff6b6b;
+    }
+    html, body {margin:0; padding:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;}
+    main {max-width: 980px; margin: 48px auto 96px; padding: 0 20px;}
+    header h1 {font-size: 2.2rem; margin: 0 0 8px;}
+    header p {color: var(--muted); margin: 0 0 24px;}
+    .panel {background: var(--panel); border: 1px solid #1f2937; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,.25);}    
+    h2 {font-size: 1.4rem; border-left: 4px solid var(--acc); padding-left: 10px; margin-top: 28px;}
+    h3 {font-size: 1.1rem; color: var(--muted); margin-top: 22px;}
+    code, pre {font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    pre {background: #0c111b; border: 1px solid #1f2937; border-radius: 12px; padding: 14px; overflow: auto;}
+    .grid {display: grid; gap: 12px; grid-template-columns: repeat(auto-fit,minmax(240px,1fr));}
+    .tag {display:inline-block; padding: 2px 8px; border-radius: 999px; border:1px solid #1f2937; background:#0c111b; color: var(--muted); font-size: .85rem;}
+    .callout {border-left: 4px solid var(--acc); padding: 12px 14px; background: #0c111b; border-radius: 8px;}
+    table {width: 100%; border-collapse: collapse; background: #0c111b; border-radius: 12px; overflow:hidden;}
+    th, td {padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left;}
+    th {color: var(--muted); background:#0b1220;}
+    tr:last-child td {border-bottom: 0;}
+    a {color: var(--acc); text-decoration: none;}
+    a:hover {text-decoration: underline;}
+    .small {font-size:.92rem; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SELF-INSTRUCT — Step 1: Instruction Generation</h1>
+      <p class="small">Project: <strong>self-instruct-gpt4mini</strong> • Author: Dimitris Markopoulos • Date: 2025‑10‑15</p>
+      <div class="panel">
+        <p><strong>Goal.</strong> Expand from a small human-written nucleus of 175 tasks to a large, diverse set of synthetic <em>instructions</em> that look and read like human prompts. This step <em>does not</em> create answers; it only invents new tasks for later stages.</p>
+        <div class="grid" style="margin-top:8px">
+          <div><span class="tag">Input: 175 seed instructions</span></div>
+          <div><span class="tag">Output: synthetic instructions (text only)</span></div>
+          <div><span class="tag">Model: GPT-4-mini (API)</span></div>
+          <div><span class="tag">Budget target: &lt; $100 (full pipeline)</span></div>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Concept</h2>
+      <p>Provide the model with a few high-quality seed instructions as <em>in-context demonstrations</em> and prompt it to continue the list with new, plausible tasks. Repeat to accumulate thousands of candidates. This bootstraps instruction diversity without additional manual authoring.</p>
+    </section>
+
+    <section>
+      <h2>Inputs</h2>
+      <ul>
+        <li><code>data/seed_tasks.jsonl</code> — 175 human-written seeds (Apache-2.0).</li>
+        <li>Sampler that draws <code>k</code> seeds per batch (default <code>k=8</code>, e.g., 6 human + 2 model‑generated in later rounds).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Prompt Template</h2>
+      <p>Minimal list-continuation prompt (adapted to our repo):</p>
+      <pre><code>Come up with a series of tasks:
+
+1. &lt;seed instruction A&gt;
+2. &lt;seed instruction B&gt;
+3. &lt;seed instruction C&gt;
+4. &lt;seed instruction D&gt;
+5. &lt;seed instruction E&gt;
+6. &lt;seed instruction F&gt;
+7. &lt;seed instruction G&gt;
+8. &lt;seed instruction H&gt;
+9.
+</code></pre>
+      <p>The model continues until tokens are exceeded (hyperparameter, research uses token threshold) or it decides to stop or reaches 16 items. The constraints are purposely lax to maximize the models "creativity". We then parse the continuation into standalone instructions.</p>
+    </section>
+
+    <section>
+      <h2>Algorithm</h2>
+      <ol>
+        <li>Sample <code>8</code> distinct seed instructions (6 from the human curated set (size 175) and 2 from the generated set).</li>
+        <li>
+            Render prompt (f-string input + instructions) and call the API with mild creativity.
+            <div style="margin-left:20px;">
+              <p><strong>Hyperparameters:</strong></p>
+              <ul style="margin-left:20px;">
+                <li><code>temperature = 0.8</code> — controls the model's randomness, i.e., how freely it may branch off-topic.</li>
+                <li><code>top_p = 0.9</code> — restricts token sampling to the top 90% probability mass, keeping outputs coherent.</li>
+                <li><code>max_tokens = 1024</code> — allows the model to produce multiple new task instructions per call.</li>
+              </ul>
+            </div>
+          </li>
+        </p>
+
+        <li>Parse the generated output and grab new data!</li>
+        <li>
+            Filter and postprocess generated instructions before adding them to the task pool.
+            <div style="margin-left:20px;">
+                </p>
+              <ul style="margin-left:20px;">
+                <li><strong>Similarity filter:</strong> Add a new instruction only if its ROUGE-L or embedding similarity with existing tasks is below <code>0.7</code> to maintain diversity.</li>
+                <li><strong>Keyword filter:</strong> Remove tasks mentioning unsupported modalities such as <em>image</em>, <em>picture</em>, or <em>graph</em>.</li>
+                <li><strong>Length filter:</strong> Discard instructions that are too short (<code>&lt;5</code> words) or too long (<code>&gt;50</code> words).</li>
+                <li><strong>Duplicate cleanup:</strong> Exclude instances with identical inputs or conflicting outputs.</li>
+              </ul>
+            </div>
+          </li>
+          <p>
+          
+        <li>Repeat <code>N</code> batches until target count reached (depends on my budget).</li>
+      </ol>
+
+      <p><em>Note for step 4: I diverge from the original research paper; I prefer dumping all generated responses first and then performing post-processing.</em></p>
+    </section>
+
+
+<!-- ########################################################### -->
+
+
+
+
+
+    <section>
+      <h2>Reference Implementation (Python)</h2>
+      <pre><code>import json, random, re
+from pathlib import Path
+
+SEEDS_PATH = Path("data/self_instruct/seed_tasks.jsonl")
+OUT_PATH = Path("data/generated_instructions.jsonl")
+
+# 1) Load 175 seeds
+seeds = [json.loads(l) for l in SEEDS_PATH.read_text().splitlines()]
+seed_instructions = [t["instruction"] for t in seeds]
+
+# 2) Prompt builder
+LIST_TPL = """Come up with a series of tasks:\n\n{items}{next_index}."""
+
+def build_prompt(examples):
+    items = "\n".join(f"{i+1}. {ex}" for i, ex in enumerate(examples)) + "\n"
+    return LIST_TPL.format(items=items, next_index=len(examples)+1)
+
+# 3) Call your chat model (pseudo; plug in your API client)
+
+def call_model(prompt, model="gpt-4o-mini", temperature=0.8, max_tokens=512):
+    # return string continuation
+    raise NotImplementedError
+
+# 4) Parse numbered lines from continuation
+NUM_LINE = re.compile(r"^\s*\d+\s*\.(.*)$")
+
+def extract_instructions(text):
+    out = []
+    for line in text.splitlines():
+        m = NUM_LINE.match(line)
+        if m:
+            instr = m.group(1).strip().strip("-:–")
+            if len(instr) >= 10:
+                out.append(instr)
+    return out
+
+# 5) Simple heuristics
+
+def good(instr):
+    if len(instr) < 10 or len(instr) > 220: return False
+    if any(k in instr.lower() for k in ("kill", "explosive", "credit card")): return False
+    return True
+
+# 6) Main loop
+
+def generate_batches(batches=100, k=8):
+    all_new = []
+    for _ in range(batches):
+        examples = random.sample(seed_instructions, k)
+        prompt = build_prompt(examples)
+        cont = call_model(prompt)
+        cand = [i for i in extract_instructions(cont) if good(i)]
+        all_new.extend(cand)
+    return all_new
+
+# 7) Save
+# new_instr = generate_batches(batches=200)
+# with OUT_PATH.open("w") as f:
+#     for instr in new_instr:
+#         f.write(json.dumps({"instruction": instr}) + "\n")
+</code></pre>
+      <p class="small">Note: The above includes a placeholder <code>call_model</code>. Replace with your provider’s SDK. Keep temperatures moderate for diversity without collapse.</p>
+    </section>
+
+    <section>
+      <h2>Outputs</h2>
+      <table>
+        <thead>
+          <tr><th>Artifact</th><th>Description</th><th>Location</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>generated_instructions.jsonl</code></td><td>Raw synthetic instructions (unlabeled)</td><td><code>data/generated_instructions.jsonl</code></td></tr>
+          <tr><td><code>generated_instructions.filtered.jsonl</code></td><td>Post‑filter, deduped</td><td><code>data/generated_instructions.filtered.jsonl</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Parameter Guidance</h2>
+      <ul>
+        <li><strong>k (examples per prompt):</strong> 6–10. Higher k → closer mimicry; lower k → more drift/diversity.</li>
+        <li><strong>temperature:</strong> 0.6–0.9. Start at 0.8.</li>
+        <li><strong>top_p:</strong> 0.9 (or disable if using only temperature).</li>
+        <li><strong>batches:</strong> pick to reach your target count; expect ~6–12 new items per continuation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Next Steps</h2>
+      <ol>
+        <li><strong>Step 2 — Classification Identification:</strong> tag which instructions imply discrete label spaces.</li>
+        <li><strong>Step 3 — Instance Generation:</strong> for each instruction, synthesize input–output pairs.</li>
+        <li><strong>Step 4 — Filtering:</strong> LM‑scored clarity + safety; dedup; enforce domain balance.</li>
+        <li><strong>Step 5 — Fine‑tuning:</strong> train/compare GPT‑4‑mini‑ft vs base on a held‑out eval set.</li>
+      </ol>
+    </section>
+
+    <footer class="small" style="margin-top:28px; color:var(--muted)">
+      <p>Includes data adapted from <em>SELF‑INSTRUCT</em> (Wang et al., 2023), licensed under Apache‑2.0. This HTML is generated for documentation of Step 1 only.</p>
+    </footer>
+  </main>
+</body>
+</html>
