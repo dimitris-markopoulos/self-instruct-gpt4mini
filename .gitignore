@@ -1,0 +1,14 @@
+# --- Secrets / API keys ---
+.env
+secrets.env
+*.key
+*.pem
+
+# --- Python cache ---
+__pycache__/
+*.pyc
+*.pyo
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
