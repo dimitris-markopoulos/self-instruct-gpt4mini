@@ -1,3 +1,6 @@
+#==================================
+# STEP 1 : INSTRUCTION GENERATION
+#==================================
 import random
 import openai
 import json
@@ -5,6 +8,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import yaml
+import re
 
 # Load API KEY
 load_dotenv("secrets.env") # store secret
@@ -51,7 +55,7 @@ def create_prompt(instruction_sample : list) -> str:
     return "\n".join(lines)
 
 ##
-def generate_instructions(prompt: str, model="gpt-4o-mini"):
+def generate_instructions(prompt: str, model="gpt-4o-mini") -> str:
     """
     Query OpenAI api to generate new task instructions.
     """
@@ -71,11 +75,42 @@ def generate_instructions(prompt: str, model="gpt-4o-mini"):
         top_p=0.5,
         max_tokens=1024
     )
-
     return resp.choices[0].message.content
 
-if __name__ == '__main__':
+##
+def parse_instructions(text: str) -> list:
+    """
+    Parse raw model output (continuation of 'Task 9: ...') into a list of clean instruction dicts.
+    """
+    if not text.strip().startswith("Task"): # prepend "Task 9:" if model didn't include it
+        text = "Task 9: " + text.strip()
+    matches = re.findall(r"Task\s*\d+:\s*(.+?)(?=\s*Task\s*\d+:|$)", text, flags=re.S) # find all task blocks like "Task 9: some text"
+    tasks = []
+    for t in matches:
+        cleaned = t.strip().replace("\n", " ").strip(" .")
+        if cleaned:
+            tasks.append({
+                "instruction": cleaned,
+                "source": "gpt-4o-mini",
+            })
+    return tasks
+
+##
+def create_task(model:str="gpt-4o-mini") -> list[dict]:
+    """
+    Wrapper of entire pipeline for step 1. 
+    Outputs nice list[dict] with keys instruction and source.
+    To use in loop to fill data/generated_task.jsonl
+    """
     sample_list = grab_subsample()
     prompt = create_prompt(sample_list)
-    # generate_instructions(prompt, model="gpt-4o-mini")
+    generated_instructions_str = generate_instructions(prompt, model=model)
+    task_list = parse_instructions(generated_instructions_str)
+    return task_list
 
+if __name__ == '__main__':
+    task_list = create_task()
+    print(f"Dict : {task_list}")
+    print("\n")
+    for i in range(len(task_list)):
+        print(task_list[i]['instruction'])
