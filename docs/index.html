@@ -64,15 +64,15 @@
       <p>Minimal list-continuation prompt (adapted to our repo):</p>
       <pre><code>Come up with a series of tasks:
 
-1. &lt;seed instruction A&gt;
-2. &lt;seed instruction B&gt;
-3. &lt;seed instruction C&gt;
-4. &lt;seed instruction D&gt;
-5. &lt;seed instruction E&gt;
-6. &lt;seed instruction F&gt;
-7. &lt;seed instruction G&gt;
-8. &lt;seed instruction H&gt;
-9.
+Task 1. &lt;seed instruction A&gt;
+Task 2. &lt;seed instruction B&gt;
+Task 3. &lt;seed instruction C&gt;
+Task 4. &lt;seed instruction D&gt;
+Task 5. &lt;seed instruction E&gt;
+Task 6. &lt;seed instruction F&gt;
+Task 7. &lt;seed instruction G&gt;
+Task 8. &lt;seed instruction H&gt;
+Task 9.
 </code></pre>
       <p>The model continues until tokens are exceeded (hyperparameter, research uses token threshold) or it decides to stop or reaches 16 items. The constraints are purposely lax to maximize the models "creativity". We then parse the continuation into standalone instructions.</p>
     </section>
@@ -115,115 +115,175 @@
       <p><em>Note for step 4: I diverge from the original research paper; I prefer dumping all generated responses first and then performing post-processing.</em></p>
     </section>
 
-
-<!-- ########################################################### -->
-
-
-
-
+    <section>
+        <h2>Outputs</h2>
+        <table>
+          <thead>
+            <tr><th>Artifact</th><th>Description</th><th>Location</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>generated_instructions.jsonl</code></td><td>Raw synthetic instructions (unlabeled)</td><td><code>data/generated_instructions.jsonl</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+  
+    <section id="notebooks" style="margin: 3rem 0;">
+        <h2 style="text-align:center; font-weight:600; margin-bottom:1rem;"></h2>
+      
+        <div style="
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            margin: auto;
+        ">
+          <iframe
+            src="https://nbviewer.org/github/dimitris-markopoulos/self-instruct-gpt4mini/blob/main/notebooks/algorithm_output_example.ipynb"
+            width="100%"
+            height="1000"
+            frameborder="0"
+            style="border:none;">
+          </iframe>
+        </div>
+      
+        <p style="text-align:center; margin-top:1rem;">
+          <a href="https://github.com/dimitris-markopoulos/self-instruct-gpt4mini/"
+             target="_blank"
+             rel="noopener noreferrer"
+             style="text-decoration:none; font-weight:500;">
+            🔗 View all code on GitHub →
+          </a>
+        </p>
+      </section>
+      
 
     <section>
       <h2>Reference Implementation (Python)</h2>
-      <pre><code>import json, random, re
+      <pre><code>
+#==================================
+# STEP 1 : INSTRUCTION GENERATION
+#==================================
+import random
+import openai
+import json
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+import yaml
+import re
 
-SEEDS_PATH = Path("data/self_instruct/seed_tasks.jsonl")
-OUT_PATH = Path("data/generated_instructions.jsonl")
+# Load API KEY
+load_dotenv("secrets.env") # store secret
+with open("config.yaml") as f:
+    raw_yaml = f.read()
+    expanded_yaml = os.path.expandvars(raw_yaml) # Contains secret
+    config = yaml.safe_load(expanded_yaml)
+openai.api_key = config["openai"]["api_key"] # Configure the OpenAI client
 
-# 1) Load 175 seeds
-seeds = [json.loads(l) for l in SEEDS_PATH.read_text().splitlines()]
-seed_instructions = [t["instruction"] for t in seeds]
+# Download the 175 human-written tasks
+with open("data/seed_tasks.jsonl") as f:
+    seed_tasks = [json.loads(line) for line in f]
 
-# 2) Prompt builder
-LIST_TPL = """Come up with a series of tasks:\n\n{items}{next_index}."""
+##
+def grab_subsample():
+    """
+    Pulls 6 human-written instructions and 2 LLM instructions. 
+    Initalizes with 8 human-written instructions.
+    """
+    with open("data/generated_tasks.jsonl") as f:
+        sampled_llm_tasks = [json.loads(line) for line in f]
+    
+    if not sampled_llm_tasks: 
+        # intialize to all human-written instructions if no generated responses exist
+        return random.sample(seed_tasks, 8)
+    
+    llm_sample = random.sample(sampled_llm_tasks, 2)
+    human_sample = random.sample(seed_tasks, 6)
 
-def build_prompt(examples):
-    items = "\n".join(f"{i+1}. {ex}" for i, ex in enumerate(examples)) + "\n"
-    return LIST_TPL.format(items=items, next_index=len(examples)+1)
+    return llm_sample + human_sample
 
-# 3) Call your chat model (pseudo; plug in your API client)
+##
+def create_prompt(instruction_sample : list) -> str:
+    """
+    Render the instruction-generation prompt (using Table 5 from SELF-INSTRUCT).
+    """
+    header = "Come up with a series of tasks:\n\n"
+    lines = []
+    for i, task in enumerate(instruction_sample):
+        line = f'Task {i+1}: {task["instruction"].strip(" ")}'
+        lines.append(line)
+        if i == 7: # add last section (empty); for LLM to fill in
+            lines.append(f'Task {i+2}:')
+    return "\n".join(lines)
 
-def call_model(prompt, model="gpt-4o-mini", temperature=0.8, max_tokens=512):
-    # return string continuation
-    raise NotImplementedError
+##
+def generate_instructions(prompt: str, model="gpt-4o-mini") -> str:
+    """
+    Query OpenAI api to generate new task instructions.
+    """
+    resp = openai.chat.completions.create(
+        model=config["openai"]["model"],
+        messages=[ 
+            # had to include role because model was being too helpful and did not continue list
+            # this gave it further direction - original research did not do this
+            {"role": "system", "content": (
+                "Continue the numbered list of tasks below. "
+                "Write 3 to 8 new Task entries that follow the same style. "
+                "Do not explain, comment, or ask for clarification."
+            )},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        top_p=0.5,
+        max_tokens=1024
+    )
+    return resp.choices[0].message.content
 
-# 4) Parse numbered lines from continuation
-NUM_LINE = re.compile(r"^\s*\d+\s*\.(.*)$")
+##
+def parse_instructions(text: str) -> list:
+    """
+    Parse raw model output (continuation of 'Task 9: ...') into a list of clean instruction dicts.
+    """
+    if not text.strip().startswith("Task"): # prepend "Task 9:" if model didn't include it
+        text = "Task 9: " + text.strip()
+    matches = re.findall(r"Task\s*\d+:\s*(.+?)(?=\s*Task\s*\d+:|$)", text, flags=re.S) # find all task blocks like "Task 9: some text"
+    tasks = []
+    for t in matches:
+        cleaned = t.strip().replace("\n", " ").strip(" .")
+        if cleaned:
+            tasks.append({
+                "instruction": cleaned,
+                "source": "gpt-4o-mini",
+            })
+    return tasks
 
-def extract_instructions(text):
-    out = []
-    for line in text.splitlines():
-        m = NUM_LINE.match(line)
-        if m:
-            instr = m.group(1).strip().strip("-:–")
-            if len(instr) >= 10:
-                out.append(instr)
-    return out
+##
+def create_task(model:str="gpt-4o-mini") -> list[dict]:
+    """
+    Wrapper of entire pipeline for step 1. 
+    Outputs nice list[dict] with keys instruction and source.
+    To use in loop to fill data/generated_task.jsonl
+    """
+    sample_list = grab_subsample()
+    prompt = create_prompt(sample_list)
+    generated_instructions_str = generate_instructions(prompt, model=model)
+    task_list = parse_instructions(generated_instructions_str)
+    return task_list
 
-# 5) Simple heuristics
-
-def good(instr):
-    if len(instr) < 10 or len(instr) > 220: return False
-    if any(k in instr.lower() for k in ("kill", "explosive", "credit card")): return False
-    return True
-
-# 6) Main loop
-
-def generate_batches(batches=100, k=8):
-    all_new = []
-    for _ in range(batches):
-        examples = random.sample(seed_instructions, k)
-        prompt = build_prompt(examples)
-        cont = call_model(prompt)
-        cand = [i for i in extract_instructions(cont) if good(i)]
-        all_new.extend(cand)
-    return all_new
-
-# 7) Save
-# new_instr = generate_batches(batches=200)
-# with OUT_PATH.open("w") as f:
-#     for instr in new_instr:
-#         f.write(json.dumps({"instruction": instr}) + "\n")
+if __name__ == '__main__':
+    task_list = create_task()
+    print(f"Dict : {task_list}")
+    print("\n")
+    for i in range(len(task_list)):
+        print(task_list[i]['instruction'])
 </code></pre>
-      <p class="small">Note: The above includes a placeholder <code>call_model</code>. Replace with your provider’s SDK. Keep temperatures moderate for diversity without collapse.</p>
     </section>
 
-    <section>
-      <h2>Outputs</h2>
-      <table>
-        <thead>
-          <tr><th>Artifact</th><th>Description</th><th>Location</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>generated_instructions.jsonl</code></td><td>Raw synthetic instructions (unlabeled)</td><td><code>data/generated_instructions.jsonl</code></td></tr>
-          <tr><td><code>generated_instructions.filtered.jsonl</code></td><td>Post‑filter, deduped</td><td><code>data/generated_instructions.filtered.jsonl</code></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section>
-      <h2>Parameter Guidance</h2>
-      <ul>
-        <li><strong>k (examples per prompt):</strong> 6–10. Higher k → closer mimicry; lower k → more drift/diversity.</li>
-        <li><strong>temperature:</strong> 0.6–0.9. Start at 0.8.</li>
-        <li><strong>top_p:</strong> 0.9 (or disable if using only temperature).</li>
-        <li><strong>batches:</strong> pick to reach your target count; expect ~6–12 new items per continuation.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Next Steps</h2>
-      <ol>
-        <li><strong>Step 2 — Classification Identification:</strong> tag which instructions imply discrete label spaces.</li>
-        <li><strong>Step 3 — Instance Generation:</strong> for each instruction, synthesize input–output pairs.</li>
-        <li><strong>Step 4 — Filtering:</strong> LM‑scored clarity + safety; dedup; enforce domain balance.</li>
-        <li><strong>Step 5 — Fine‑tuning:</strong> train/compare GPT‑4‑mini‑ft vs base on a held‑out eval set.</li>
-      </ol>
-    </section>
 
     <footer class="small" style="margin-top:28px; color:var(--muted)">
-      <p>Includes data adapted from <em>SELF‑INSTRUCT</em> (Wang et al., 2023), licensed under Apache‑2.0. This HTML is generated for documentation of Step 1 only.</p>
-    </footer>
-  </main>
-</body>
-</html>
+        <p>Includes data adapted from <em>SELF-INSTRUCT</em> (Wang et al., 2023), licensed under Apache-2.0.</p>
+      </footer>
+    </main>
+  </body>
+  </html>
