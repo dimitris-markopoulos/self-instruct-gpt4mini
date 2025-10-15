@@ -1,5 +1,23 @@
-# self-instruct-gpt4mini
+# Self-Instruct Seed Data Attribution
 
-**Objective:**  
-A scaled-down reproduction of the *SELF-INSTRUCT* framework (Wang et al., 2023), using OpenAI’s `gpt-4o-mini` via API calls instead of local model fine-tuning.  
-This project explores instruction generation, filtering, and evaluation pipelines for aligning LLMs with self-generated data — under a <$100 compute budget.
+This directory contains the official `seed_tasks.jsonl` file from  
+**SELF-INSTRUCT: Aligning Language Models with Self-Generated Instructions**  
+by Yizhong Wang, Yeganeh Kordi, Swaroop Mishra, Alisa Liu, Noah A. Smith, Daniel Khashabi, and Hannaneh Hajishirzi  
+(ACL 2023).  
+Original repository: [https://github.com/yizhongw/self-instruct](https://github.com/yizhongw/self-instruct)
+
+## License
+This dataset is licensed under the **Apache License 2.0**.  
+A copy of the license is provided in `LICENSE.self_instruct.txt`.
+
+## Use in This Project
+This data is included **for academic replication and benchmarking**.  
+The file may have been **reformatted** (e.g., converted to Python lists or JSON)  
+but **no substantive content has been altered**.  
+All rights remain with the original authors.
+
+### Citation
+If you use this data in any publication or derivative work, please cite:
+
+> Wang et al. (2023). *SELF-INSTRUCT: Aligning Language Models with Self-Generated Instructions.* ACL 2023.
+
