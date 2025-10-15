@@ -12,12 +12,10 @@ A copy of the license is provided in `LICENSE.self_instruct.txt`.
 
 ## Use in This Project
 This data is included **for academic replication and benchmarking**.  
-The file may have been **reformatted** (e.g., converted to Python lists or JSON)  
+The file have been **reformatted** (e.g., converted to Python lists)  
 but **no substantive content has been altered**.  
 All rights remain with the original authors.
 
 ### Citation
-If you use this data in any publication or derivative work, please cite:
-
 > Wang et al. (2023). *SELF-INSTRUCT: Aligning Language Models with Self-Generated Instructions.* ACL 2023.
 
