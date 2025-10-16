@@ -9,6 +9,9 @@ import os
 from dotenv import load_dotenv
 import yaml
 import re
+from datetime import datetime
+import sys
+import time
 
 # Load API KEY
 load_dotenv("secrets.env") # store secret
@@ -21,6 +24,23 @@ openai.api_key = config["openai"]["api_key"] # Configure the OpenAI client
 # Download the 175 human-written tasks
 with open("data/seed_tasks.jsonl") as f:
     seed_tasks = [json.loads(line) for line in f]
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+LOG_PATH = LOG_DIR / f"bootstrap_{datetime.now():%Y%m%d_%H%M%S}.log"
+
+def log(message: str, level: str = "INFO") -> None:
+    """Prints a timestamped log message and writes to logs/bootstrap.log."""
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    formatted = f"[{now}] [{level.upper()}] {message}"
+    print(formatted) # print to terminal
+    with open(LOG_PATH, "a") as log_file: # also append to log file
+        log_file.write(formatted + "\n")
+
+log("=" * 60)
+log(f"SELF-INSTRUCT STEP 1 | {datetime.now():%Y-%m-%d %H:%M:%S}")
+log("=" * 60)
 
 ##
 def grab_subsample():
@@ -96,21 +116,53 @@ def parse_instructions(text: str) -> list:
     return tasks
 
 ##
-def create_task(model:str="gpt-4o-mini") -> list[dict]:
+def create_task(model: str = "gpt-4o-mini", timeout: int = 45) -> list[dict]:
     """
     Wrapper of entire pipeline for step 1. 
     Outputs nice list[dict] with keys instruction and source.
     To use in loop to fill data/generated_task.jsonl
     """
+    start = time.time()
+
     sample_list = grab_subsample()
     prompt = create_prompt(sample_list)
-    generated_instructions_str = generate_instructions(prompt, model=model)
+    try:
+        while True:
+            if time.time() - start > timeout:
+                raise TimeoutError(f"API call exceeded {timeout}s, skipping batch.")
+            generated_instructions_str = generate_instructions(prompt, model=model)
+            break # if successful
+    except Exception as e:
+        log(f"(X) Skipping batch due to error: {repr(e)}", level="ERROR")
+        return None
+
     task_list = parse_instructions(generated_instructions_str)
+    duration = time.time() - start
+    log(f"Batch finished in {duration:.1f}s — {len(task_list)} tasks.", level="INFO")
     return task_list
 
-if __name__ == '__main__':
-    task_list = create_task()
-    print(f"Dict : {task_list}")
-    print("\n")
-    for i in range(len(task_list)):
-        print(task_list[i]['instruction'])
+if __name__ == "__main__":
+    start_time = datetime.now()
+    n_iterations = 50
+    log(f"Bootstrapping started for {n_iterations} iterations...")
+    total_new = 0
+    for i in range(1, n_iterations + 1):
+        try:
+            task_list = create_task()
+            if not task_list: # if timeout occurs or api stalls
+                log(f"Iteration {i}/{n_iterations}: skipped (no tasks returned).", level="WARN")
+                continue
+            with open("data/generated_tasks.jsonl", "a") as f:
+                for task in task_list:
+                    f.write(json.dumps(task) + "\n")
+            total_new += len(task_list)
+            log(f"Iteration {i}/{n_iterations}: {len(task_list)} new tasks generated.")
+        except Exception as e:
+            log(f"(X) Iteration {i}/{n_iterations} failed with error: {repr(e)}", level="ERROR")
+        
+        time.sleep(random.uniform(1.0, 2.0)) # to avoid rate limiting
+
+    end_time = datetime.now()
+    elapsed = (end_time - start_time).total_seconds() / 60
+    log(f"Bootstrapping complete. Total {total_new} new instructions appended "
+        f"to generated_tasks.jsonl in {elapsed:.2f} minutes.")
