@@ -1,0 +1,16 @@
+{"instruction": "Analyze the sentiment of the following text", "is_classification": true}
+{"instruction": "Generate a list of synonyms for the given word", "is_classification": false}
+{"instruction": "Create a timeline of major events in the specified historical period", "is_classification": false}
+{"instruction": "Provide a recipe for a traditional dish from a specific cuisine", "is_classification": false}
+{"instruction": "Identify the main characters in the provided story and describe their roles", "is_classification": false}
+{"instruction": "Write a short poem based on the theme of friendship", "is_classification": false}
+{"instruction": "Compare and contrast two different approaches to solving a problem", "is_classification": false}
+{"instruction": "Write a short story that begins with the line, \"It was a dark and stormy night.\"", "is_classification": false}
+{"instruction": "Create a list of five books that are considered classics in literature", "is_classification": false}
+{"instruction": "Summarize the main points of a given TED Talk", "is_classification": false}
+{"instruction": "Generate a list of potential interview questions for a job in marketing", "is_classification": false}
+{"instruction": "Describe the impact of social media on modern communication", "is_classification": false}
+{"instruction": "Provide tips for effective time management in a busy work environment", "is_classification": false}
+{"instruction": "Write a brief review of a recent movie release", "is_classification": false}
+{"instruction": "Create a weekly meal plan that accommodates vegetarian preferences", "is_classification": false}
+{"instruction": "Summarize the main themes of a classic novel", "is_classification": false}
