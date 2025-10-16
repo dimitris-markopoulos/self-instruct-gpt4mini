@@ -143,7 +143,7 @@ def create_task(model: str = "gpt-4o-mini", timeout: int = 45) -> list[dict]:
 
 if __name__ == "__main__":
     start_time = datetime.now()
-    n_iterations = 50
+    n_iterations = 300
     log(f"Bootstrapping started for {n_iterations} iterations...")
     total_new = 0
     for i in range(1, n_iterations + 1):
@@ -166,3 +166,5 @@ if __name__ == "__main__":
     elapsed = (end_time - start_time).total_seconds() / 60
     log(f"Bootstrapping complete. Total {total_new} new instructions appended "
         f"to generated_tasks.jsonl in {elapsed:.2f} minutes.")
+
+# caffeinate -i python scripts/bootstrap_generation.py

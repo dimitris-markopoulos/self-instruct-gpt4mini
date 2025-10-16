@@ -1,0 +1,105 @@
+[2025-10-15 21:19:22] [INFO] ============================================================
+[2025-10-15 21:19:22] [INFO] SELF-INSTRUCT STEP 1 | 2025-10-15 21:19:22
+[2025-10-15 21:19:22] [INFO] ============================================================
+[2025-10-15 21:19:22] [INFO] Bootstrapping started for 50 iterations...
+[2025-10-15 21:19:26] [INFO] Batch finished in 3.7s — 7 tasks.
+[2025-10-15 21:19:26] [INFO] Iteration 1/50: 7 new tasks generated.
+[2025-10-15 21:19:31] [INFO] Batch finished in 3.0s — 7 tasks.
+[2025-10-15 21:19:31] [INFO] Iteration 2/50: 7 new tasks generated.
+[2025-10-15 21:19:35] [INFO] Batch finished in 2.3s — 7 tasks.
+[2025-10-15 21:19:35] [INFO] Iteration 3/50: 7 new tasks generated.
+[2025-10-15 21:19:39] [INFO] Batch finished in 2.7s — 7 tasks.
+[2025-10-15 21:19:39] [INFO] Iteration 4/50: 7 new tasks generated.
+[2025-10-15 21:19:42] [INFO] Batch finished in 1.9s — 5 tasks.
+[2025-10-15 21:19:42] [INFO] Iteration 5/50: 5 new tasks generated.
+[2025-10-15 21:19:47] [INFO] Batch finished in 4.4s — 7 tasks.
+[2025-10-15 21:19:47] [INFO] Iteration 6/50: 7 new tasks generated.
+[2025-10-15 21:19:53] [INFO] Batch finished in 3.6s — 7 tasks.
+[2025-10-15 21:19:53] [INFO] Iteration 7/50: 7 new tasks generated.
+[2025-10-15 21:19:56] [INFO] Batch finished in 2.4s — 7 tasks.
+[2025-10-15 21:19:56] [INFO] Iteration 8/50: 7 new tasks generated.
+[2025-10-15 21:20:03] [INFO] Batch finished in 5.0s — 7 tasks.
+[2025-10-15 21:20:03] [INFO] Iteration 9/50: 7 new tasks generated.
+[2025-10-15 21:20:06] [INFO] Batch finished in 1.9s — 7 tasks.
+[2025-10-15 21:20:06] [INFO] Iteration 10/50: 7 new tasks generated.
+[2025-10-15 21:20:09] [INFO] Batch finished in 1.6s — 7 tasks.
+[2025-10-15 21:20:09] [INFO] Iteration 11/50: 7 new tasks generated.
+[2025-10-15 21:20:15] [INFO] Batch finished in 3.7s — 7 tasks.
+[2025-10-15 21:20:15] [INFO] Iteration 12/50: 7 new tasks generated.
+[2025-10-15 21:20:19] [INFO] Batch finished in 2.2s — 7 tasks.
+[2025-10-15 21:20:19] [INFO] Iteration 13/50: 7 new tasks generated.
+[2025-10-15 21:20:23] [INFO] Batch finished in 2.3s — 7 tasks.
+[2025-10-15 21:20:23] [INFO] Iteration 14/50: 7 new tasks generated.
+[2025-10-15 21:20:27] [INFO] Batch finished in 2.7s — 7 tasks.
+[2025-10-15 21:20:27] [INFO] Iteration 15/50: 7 new tasks generated.
+[2025-10-15 21:20:32] [INFO] Batch finished in 3.2s — 7 tasks.
+[2025-10-15 21:20:32] [INFO] Iteration 16/50: 7 new tasks generated.
+[2025-10-15 21:20:36] [INFO] Batch finished in 1.9s — 7 tasks.
+[2025-10-15 21:20:36] [INFO] Iteration 17/50: 7 new tasks generated.
+[2025-10-15 21:20:40] [INFO] Batch finished in 2.2s — 7 tasks.
+[2025-10-15 21:20:40] [INFO] Iteration 18/50: 7 new tasks generated.
+[2025-10-15 21:20:45] [INFO] Batch finished in 3.6s — 7 tasks.
+[2025-10-15 21:20:45] [INFO] Iteration 19/50: 7 new tasks generated.
+[2025-10-15 21:20:48] [INFO] Batch finished in 2.3s — 7 tasks.
+[2025-10-15 21:20:48] [INFO] Iteration 20/50: 7 new tasks generated.
+[2025-10-15 21:20:52] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:20:52] [INFO] Iteration 21/50: 7 new tasks generated.
+[2025-10-15 21:20:56] [INFO] Batch finished in 3.1s — 7 tasks.
+[2025-10-15 21:20:56] [INFO] Iteration 22/50: 7 new tasks generated.
+[2025-10-15 21:21:00] [INFO] Batch finished in 2.0s — 7 tasks.
+[2025-10-15 21:21:00] [INFO] Iteration 23/50: 7 new tasks generated.
+[2025-10-15 21:21:04] [INFO] Batch finished in 2.5s — 7 tasks.
+[2025-10-15 21:21:04] [INFO] Iteration 24/50: 7 new tasks generated.
+[2025-10-15 21:21:08] [INFO] Batch finished in 2.9s — 7 tasks.
+[2025-10-15 21:21:08] [INFO] Iteration 25/50: 7 new tasks generated.
+[2025-10-15 21:21:13] [INFO] Batch finished in 3.1s — 7 tasks.
+[2025-10-15 21:21:13] [INFO] Iteration 26/50: 7 new tasks generated.
+[2025-10-15 21:21:20] [INFO] Batch finished in 5.0s — 7 tasks.
+[2025-10-15 21:21:20] [INFO] Iteration 27/50: 7 new tasks generated.
+[2025-10-15 21:21:24] [INFO] Batch finished in 2.8s — 7 tasks.
+[2025-10-15 21:21:24] [INFO] Iteration 28/50: 7 new tasks generated.
+[2025-10-15 21:21:28] [INFO] Batch finished in 2.4s — 7 tasks.
+[2025-10-15 21:21:28] [INFO] Iteration 29/50: 7 new tasks generated.
+[2025-10-15 21:21:33] [INFO] Batch finished in 3.3s — 7 tasks.
+[2025-10-15 21:21:33] [INFO] Iteration 30/50: 7 new tasks generated.
+[2025-10-15 21:21:37] [INFO] Batch finished in 2.4s — 7 tasks.
+[2025-10-15 21:21:37] [INFO] Iteration 31/50: 7 new tasks generated.
+[2025-10-15 21:21:41] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:21:41] [INFO] Iteration 32/50: 7 new tasks generated.
+[2025-10-15 21:21:45] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:21:45] [INFO] Iteration 33/50: 7 new tasks generated.
+[2025-10-15 21:21:48] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:21:48] [INFO] Iteration 34/50: 7 new tasks generated.
+[2025-10-15 21:21:53] [INFO] Batch finished in 2.9s — 7 tasks.
+[2025-10-15 21:21:53] [INFO] Iteration 35/50: 7 new tasks generated.
+[2025-10-15 21:21:57] [INFO] Batch finished in 2.5s — 7 tasks.
+[2025-10-15 21:21:57] [INFO] Iteration 36/50: 7 new tasks generated.
+[2025-10-15 21:22:02] [INFO] Batch finished in 3.2s — 7 tasks.
+[2025-10-15 21:22:02] [INFO] Iteration 37/50: 7 new tasks generated.
+[2025-10-15 21:22:05] [INFO] Batch finished in 1.4s — 7 tasks.
+[2025-10-15 21:22:05] [INFO] Iteration 38/50: 7 new tasks generated.
+[2025-10-15 21:22:09] [INFO] Batch finished in 2.7s — 5 tasks.
+[2025-10-15 21:22:09] [INFO] Iteration 39/50: 5 new tasks generated.
+[2025-10-15 21:22:14] [INFO] Batch finished in 3.0s — 7 tasks.
+[2025-10-15 21:22:14] [INFO] Iteration 40/50: 7 new tasks generated.
+[2025-10-15 21:22:18] [INFO] Batch finished in 2.7s — 7 tasks.
+[2025-10-15 21:22:18] [INFO] Iteration 41/50: 7 new tasks generated.
+[2025-10-15 21:22:21] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:22:21] [INFO] Iteration 42/50: 7 new tasks generated.
+[2025-10-15 21:22:25] [INFO] Batch finished in 2.1s — 7 tasks.
+[2025-10-15 21:22:25] [INFO] Iteration 43/50: 7 new tasks generated.
+[2025-10-15 21:22:29] [INFO] Batch finished in 2.4s — 7 tasks.
+[2025-10-15 21:22:29] [INFO] Iteration 44/50: 7 new tasks generated.
+[2025-10-15 21:22:32] [INFO] Batch finished in 1.4s — 7 tasks.
+[2025-10-15 21:22:32] [INFO] Iteration 45/50: 7 new tasks generated.
+[2025-10-15 21:22:37] [INFO] Batch finished in 3.0s — 7 tasks.
+[2025-10-15 21:22:37] [INFO] Iteration 46/50: 7 new tasks generated.
+[2025-10-15 21:22:41] [INFO] Batch finished in 3.0s — 7 tasks.
+[2025-10-15 21:22:41] [INFO] Iteration 47/50: 7 new tasks generated.
+[2025-10-15 21:22:46] [INFO] Batch finished in 2.8s — 7 tasks.
+[2025-10-15 21:22:46] [INFO] Iteration 48/50: 7 new tasks generated.
+[2025-10-15 21:22:50] [INFO] Batch finished in 2.5s — 8 tasks.
+[2025-10-15 21:22:50] [INFO] Iteration 49/50: 8 new tasks generated.
+[2025-10-15 21:22:53] [INFO] Batch finished in 2.2s — 7 tasks.
+[2025-10-15 21:22:53] [INFO] Iteration 50/50: 7 new tasks generated.
+[2025-10-15 21:22:55] [INFO] Bootstrapping complete. Total 347 new instructions appended to generated_tasks.jsonl in 3.54 minutes.
