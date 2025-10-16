@@ -143,7 +143,7 @@ def create_task(model: str = "gpt-4o-mini", timeout: int = 45) -> list[dict]:
 
 if __name__ == "__main__":
     start_time = datetime.now()
-    n_iterations = 300
+    n_iterations = 10000
     log(f"Bootstrapping started for {n_iterations} iterations...")
     total_new = 0
     for i in range(1, n_iterations + 1):
